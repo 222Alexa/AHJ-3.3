@@ -39,3 +39,5 @@
 Всё должно собираться через Webpack (включая картинки и стили) и выкладываться на Github Pages через CI.
 
 **В качестве результата пришлите проверяющему ссылку на ваш GitHub-проект. Не забудьте установить бейджик сборки.**
+
+[![Build status](https://ci.appveyor.com/api/projects/status/hy5016trbx7kn3l0/branch/main?svg=true)](https://ci.appveyor.com/project/222Alexa44925/ahj-3-3/branch/main)

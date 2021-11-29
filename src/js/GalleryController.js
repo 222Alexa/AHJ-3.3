@@ -27,7 +27,6 @@ export default class CardController {
     element.addEventListener("input", this.completionField.bind(this));
     element.addEventListener("mouseover", (e) => this.preview(e));
     element.addEventListener("mouseout", (e) => this.cancelPreview(e));
-
   }
 
   renderingCard(name, url) {
@@ -36,7 +35,6 @@ export default class CardController {
     image.alt = name.value;
 
     image.onerror = () => {
-   //не отловить задвоенный тултип, появляется через раз
       const templateTooltip = this.addTooltyp(url.parentElement);
 
       templateTooltip.tooltipText = "Некорректный url";
@@ -62,14 +60,13 @@ export default class CardController {
       this.saveCard(new Card(image.alt, image.src));
     };
 
-  
     name.value = "";
     url.value = "";
   }
 
   preview(e) {
     // задержка удаления крестика. или пробовать другое событие
-    // или как победить задержку
+    // или как победить задержку?
     if (!e.target.classList.contains("picture")) {
       return;
     }
@@ -93,9 +90,8 @@ export default class CardController {
     ) {
       return;
     }
-this.removeTooltip = document.querySelectorAll(".tooltip");
-[...this.removeTooltip].forEach(elem => elem.remove());
-
+    this.removeTooltip = document.querySelectorAll(".tooltip");
+    [...this.removeTooltip].forEach((elem) => elem.remove());
   }
 
   saveCard(value) {
@@ -127,17 +123,30 @@ this.removeTooltip = document.querySelectorAll(".tooltip");
 
   validityFields(field) {
     if (field.value === "") {
-      
       const templateTooltip = this.addTooltyp(field.parentElement);
+      templateTooltip.tooltipText = "Заполните поле";
 
       if (field.classList.contains("input-image-url")) {
         field.nextElementSibling.style.top = "80px";
+        return false;
       }
       if (field.classList.contains("input-image-name")) {
         field.nextElementSibling.style.top = "35px";
+        return false;
       }
-      templateTooltip.tooltipText = "Заполните поле";
     }
+    if (field.value !== "") {
+      const isValidName = this.state.find((elem) => elem.name === field.value);
+
+      if (isValidName) {
+        const templateTooltip = this.addTooltyp(field.parentElement);
+        field.nextElementSibling.style.top = "35px";
+        templateTooltip.tooltipText = "Такое имя уже используется";
+        return false;
+      }
+    }
+
+    return true;
   }
 
   onClickAddCard(e) {
@@ -153,10 +162,10 @@ this.removeTooltip = document.querySelectorAll(".tooltip");
       return;
     }
 
-    if (this.cardName.value === "" || this.cardUrl.value === "") {
-      //задваивается подсказка в поле url
-      this.validityFields(this.cardName);
-      this.validityFields(this.cardUrl);
+    const isValidName = this.validityFields(this.cardName);
+    const isValidUrl = this.validityFields(this.cardUrl);
+
+    if (!isValidName || !isValidUrl) {
       return;
     }
 
@@ -188,31 +197,21 @@ this.removeTooltip = document.querySelectorAll(".tooltip");
 
   keyUp(e) {
     // удаление подсказки  по Enter.... карточка и так добавляется...
+    e.preventDefault();
+
     if (document.querySelector(".tooltip")) {
       return;
     }
     this.parentEl = e.target.parentElement;
     if (e.target.classList.contains("input-tooltip")) {
-      this.parentEl.querySelector(".tooltip")
-        ? this.parentEl.querySelector(".tooltip").remove()
-        : this.validityFields(e.target);
+      this.validityFields(e.target);
+      this.parentEl = e.target.parentElement;
+      if (this.parentEl.querySelector(".tooltip"))
+        this.parentEl.querySelector(".tooltip").remove();
     }
   }
 
   preloadImage(alt, url) {
-    /**
-     * как переработать эту функцию и рендеринг, чтобы и загрузка стейта работала
-     * и карточки не путались
-     * и те, у которых src не работает сейчас или потом
-     * не добавлялись в стейт или удалялись из него при загрузке.
-     * и код сократить -
-     * ушла думать
-     *
-     * подумала - оставить карточку(у которой url отвалился уже после добавления в галерею) на доске,
-     * сделать надпись - недоступно
-     * сделать активной кнопку delet
-     *
-     */
     const image = document.createElement("img");
     image.src = url;
     image.alt = alt;
